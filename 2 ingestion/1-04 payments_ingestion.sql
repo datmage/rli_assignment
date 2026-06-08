@@ -9,6 +9,12 @@ create file format if not exists rli.ingest.payments_csv_format
 create stage if not exists rli.ingest.payments_file_stage
   file_format = rli.ingest.payments_csv_format;
 
+create table if not exists rli.ingest.raw_payments (
+    payment_id number,
+    policy_id number,
+    payment_date date,
+    payment_amount number(8,2)
+);
 
 create or replace procedure rli.ingest.load_raw_payments()
   returns string

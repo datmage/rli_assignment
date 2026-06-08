@@ -19,9 +19,8 @@ create table if not exists rli.present.prs_customer_risk(
     payments_endorsements number(12,2),
     claims number(12,2),
     net_income number(12,2)--,
-    --loss_ratio number(15,8) -- we should calculate loss ratio when selecting
+    --loss_ratio number(15,8) -- calculate loss ratio when selecting
 );
-
 
 create or replace procedure rli.present.generate_customer_risk_tables()
   returns string

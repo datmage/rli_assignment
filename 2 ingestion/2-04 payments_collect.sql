@@ -1,6 +1,5 @@
 --drop table rli.collect.col_payments;
 create table if not exists rli.collect.col_payments (
-    --payment_key varchar,
     payment_id number,
     policy_id number,
     payment_date date,

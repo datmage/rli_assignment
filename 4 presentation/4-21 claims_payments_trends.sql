@@ -7,16 +7,7 @@
 -------------------------------------------------------------------------
 
 --call rli.present.call_month_totals(to_date('2024-01-01'), to_date('2026-12-31'));
---drop table if exists rli.present.prs_claims_payments_by_policy_type_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_policy_type_state_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_policy_type_industry_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_policy_type_state_industry_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_state_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_state_industry_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_industry_yearmonth;
 
-
---drop table if exists rli.present.prs_claims_payments_by_segment_yearmonth;
 create table if not exists rli.present.prs_claims_payments_by_segment_yearmonth(
     yearmonth number,
     policy_type varchar,

@@ -7,7 +7,11 @@ create or replace file format rli.ingest.endorsements_json_format
 
 create stage if not exists rli.ingest.endorsements_file_stage
   file_format = rli.ingest.endorsements_json_format;
-  
+
+--drop table if exists rli.ingest.raw_endorsements;
+create table if not exists rli.ingest.raw_endorsements(
+  variant_col variant
+);
 
 create or replace procedure rli.ingest.load_raw_endorsements()
   returns string

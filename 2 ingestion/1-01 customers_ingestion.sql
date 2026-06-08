@@ -8,7 +8,13 @@ create file format if not exists rli.ingest.customers_csv_format
   
 create stage if not exists rli.ingest.customers_file_stage
   file_format = rli.ingest.customers_csv_format;
-  
+
+create table if not exists rli.ingest.raw_customers (
+  customer_id number,
+  customer_name varchar,
+  state varchar(2),
+  industry varchar
+);
   
 create or replace procedure rli.ingest.load_raw_customers()
   returns string

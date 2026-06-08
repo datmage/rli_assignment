@@ -9,6 +9,14 @@ create file format if not exists rli.ingest.policies_csv_format
 create stage if not exists rli.ingest.policies_file_stage
   file_format = rli.ingest.policies_csv_format;
 
+create table if not exists rli.ingest.raw_policies (
+  policy_id number,
+  customer_id number,
+  policy_type varchar,
+  effective_date date,
+  expiration_date date,
+  premium number(8,2)
+);
 
 create or replace procedure rli.ingest.load_raw_policies()
   returns string

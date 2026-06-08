@@ -62,24 +62,35 @@ when not matched then
 -------------------------------------
 -- DOCUMENT ORPHANED DATA -----------
 -------------------------------------
-delete from rli.transform.orphaned_data
+delete from rli.transform.cleaned_data
 where table_name = 'trn_endorsements';
 
-insert into rli.transform.orphaned_data (table_name, foreign_table, key_value)
+insert into rli.transform.cleaned_data (table_name, table_id, reason, action_taken)
 select distinct
     'trn_endorsements',
-    'trn_policies',
-    e.policy_id
+    e.endorsement_id,
+    'missing parent in rli.transform.trn_policies ' || p.policy_id,
+    'record not transformed'
+-- insert into rli.transform.orphaned_data (table_name, foreign_table, key_value)
+-- select distinct
+--     'trn_endorsements',
+--     'trn_policies',
+--     e.policy_id
 from rli.collect.col_endorsements e
 left join rli.collect.col_policies p
     on p.policy_id = e.policy_id
 where p.policy_id is null
   and e.policy_id is not null
   and not exists (
-      select 1 from rli.transform.orphaned_data o
-      where o.table_name = 'trn_endorsements'
-        and o.foreign_table = 'trn_policies'
-        and o.key_value = e.policy_id
+      -- select 1 from rli.transform.orphaned_data o
+      -- where o.table_name = 'trn_endorsements'
+      --   and o.foreign_table = 'trn_policies'
+      --   and o.key_value = e.policy_id
+        select 1 from rli.transform.cleaned_data o
+        where o.table_name = 'trn_payments'
+            and o.table_id = e.endorsement_id
+            and o.reason = 'missing parent in rli.transform.trn_policies ' || p.policy_id
+            and o.action_taken = 'record not transformed'
   );
 
     return 'endorsements transformed successfully';
