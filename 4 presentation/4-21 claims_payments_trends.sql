@@ -7,22 +7,16 @@
 -------------------------------------------------------------------------
 
 --call rli.present.call_month_totals(to_date('2024-01-01'), to_date('2026-12-31'));
---drop table if exists rli.present.prs_claims_payments_by_policy_type_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_policy_type_state_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_policy_type_industry_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_policy_type_state_industry_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_state_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_state_industry_yearmonth;
---drop table if exists rli.present.prs_claims_payments_by_industry_yearmonth;
-
-
---drop table if exists rli.present.prs_claims_payments_by_segment_yearmonth;
+drop table if exists rli.present.prs_claims_payments_by_segment_yearmonth;
 create table if not exists rli.present.prs_claims_payments_by_segment_yearmonth(
     yearmonth number,
     policy_type varchar,
     state char(2),
     industry varchar(),
     total_payments number(12,2),
+    closed_claims number(12,2),
+    open_claims number(12,2),
+    pending_claims number(12,2),
     claims number(12,2)
 );
 
@@ -62,6 +56,9 @@ while (current_date_iter <= current_date()) do
         state,
         industry,
         total_payments,
+        closed_claims,
+        open_claims,
+        pending_claims,
         claims
     from (
         select
@@ -69,6 +66,9 @@ while (current_date_iter <= current_date()) do
             s.state,
             s.industry,
             sum(s.total_payments) as total_payments,
+            sum(s.closed_claims) as closed_claims,
+            sum(s.open_claims) as open_claims,
+            sum(s.pending_claims) as pending_claims,
             sum(s.total_claims) as claims
         from (
             select *

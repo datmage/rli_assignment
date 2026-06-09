@@ -5,6 +5,9 @@ returns table (
     total_payments number(12,2),
     total_endorsements number(12,2),
     total_pe number(12,2), --sum of payments and adjustments
+    closed_claims number(12,2),
+    open_claims number(12,2),
+    pending_claims number(12,2),
     total_claims number(12,2),
     net_income number(12,2)
 )
@@ -16,6 +19,9 @@ $$
         coalesce(pa.total_payments, 0) as total_payments,
         coalesce(en.total_endorsements, 0) as total_endorsements,
         coalesce(pa.total_payments, 0) + coalesce(en.total_endorsements, 0) as total_pe,
+        coalesce(cl.closed_claims, 0) as closed_claims,
+        coalesce(cl.open_claims, 0) as open_claims,
+        coalesce(cl.pending_claims, 0) as pending_claims,
         coalesce(cl.total_claims, 0) as total_claims,
         coalesce(pa.total_payments, 0) - coalesce(cl.total_claims, 0) + coalesce(en.total_endorsements, 0) as net_income
     from rli.transform.trn_policies po
@@ -27,7 +33,12 @@ $$
         group by policy_id
     ) pa on pa.policy_id = po.policy_id
     left join (
-        select policy_id, sum(claim_amount) as total_claims
+        select 
+            policy_id,
+            sum(case when claim_status = 'CLOSED' then claim_amount end) as closed_claims,
+            sum(case when claim_status = 'OPEN' then claim_amount end) as open_claims,
+            sum(case when claim_status = 'PENDING' then claim_amount end) as pending_claims,
+            sum(claim_amount) as total_claims
         from rli.transform.trn_claims
         where (startdate is null or claim_date >= startdate)
           and (enddate is null or claim_date <= enddate)
@@ -49,6 +60,9 @@ returns table (
     total_payments number(12,2),
     total_endorsements number(12,2),
     total_pe number(12,2),
+    closed_claims number(12,2),
+    open_claims number(12,2),
+    pending_claims number(12,2),
     total_claims number(12,2),
     net_income number(12,2)
 )

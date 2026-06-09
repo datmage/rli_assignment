@@ -6,7 +6,7 @@
 -- Select policy totals by quarter
 -------------------------------------------------------------------------
 
---drop table rli.present.prs_quarterly_policy_data;
+drop table if exists rli.present.prs_quarterly_policy_data;
 create table if not exists rli.present.prs_quarterly_policy_data(
     policy_id number,
     customer_id varchar,
@@ -15,6 +15,9 @@ create table if not exists rli.present.prs_quarterly_policy_data(
     total_payments number(12,2),
     total_endorsements number(12,2),
     payments_endorsements number(12,2),
+    closed_claims number(12,2),
+    open_claims number(12,2),
+    pending_claims number(12,2),
     claims number(12,2),
     net_income number(12,2),
     loss_ratio number(15,8)
@@ -57,9 +60,19 @@ while (current_date_iter <= current_date()) do
         t.total_payments,
         t.total_endorsements,
         t.total_pe,
+        t.closed_claims,
+        t.open_claims,
+        t.pending_claims,
         t.total_claims,
         t.net_income,
-        case when t.total_pe > 0 then t.total_claims / t.total_pe else null end as loss_ratio
+        --case when t.total_pe > 0 then t.total_claims / t.total_pe else null end as loss_ratio
+        rli.present.loss_ratio(
+            t.total_payments,
+            t.total_endorsements,
+            t.closed_claims,
+            t.open_claims,
+            t.pending_claims
+        ) as loss_ratio
     from table(rli.present.policy_totals(:quarter_start, :quarter_end)) t
     join rli.transform.trn_policies p
         on p.policy_id = t.policy_id

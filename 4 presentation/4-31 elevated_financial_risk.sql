@@ -17,11 +17,13 @@ create table if not exists rli.present.prs_customer_risk(
     total_payments number(12,2),
     total_endorsements number(12,2),
     payments_endorsements number(12,2),
+    closed_claims number(12,2),
+    open_claims number(12,2),
+    pending_claims number(12,2),
     claims number(12,2),
     net_income number(12,2)--,
-    --loss_ratio number(15,8) -- we should calculate loss ratio when selecting
+    --loss_ratio number(15,8) -- calculate loss ratio when selecting
 );
-
 
 create or replace procedure rli.present.generate_customer_risk_tables()
   returns string
@@ -42,6 +44,9 @@ select
     total_payments,
     total_endorsements,
     payments_endorsements,
+    closed_claims,
+    open_claims,
+    pending_claims,
     claims,
     net_income
 from (
@@ -54,6 +59,9 @@ from (
         sum(t.total_payments) as total_payments,
         sum(t.total_endorsements) as total_endorsements,
         sum(t.total_pe) as payments_endorsements,
+        sum(t.closed_claims) as closed_claims,
+        sum(t.open_claims) as open_claims,
+        sum(t.pending_claims) as pending_claims,
         sum(t.total_claims) as claims,
         sum(t.net_income) as net_income
     from rli.transform.trn_policies p

@@ -11,6 +11,9 @@ create table if not exists rli.present.prs_loss_ratio_by_policy_type(
     type_total_payments number(12,2),
     type_total_endorsements number(12,2),
     type_payments_endorsements number(12,2),
+    closed_claims number(12,2),
+    open_claims number(12,2),
+    pending_claims number(12,2),
     type_claims number(12,2),
     net_income number(12,2),
     loss_ratio number(15,8)
@@ -34,15 +37,28 @@ select
     type_total_payments,
     type_total_endorsements,
     type_payments_endorsements,
+    closed_claims,
+    open_claims,
+    pending_claims,
     type_claims,
     net_income,
-    case when type_payments_endorsements > 0 then type_claims / type_payments_endorsements else null end as loss_ratio
+    --case when type_payments_endorsements > 0 then type_claims / type_payments_endorsements else null end as loss_ratio
+    rli.present.loss_ratio(
+        type_total_payments,
+        type_total_endorsements,
+        closed_claims,
+        open_claims,
+        pending_claims
+    ) as loss_ratio
 from (
     select
         s.policy_type,
         sum(s.total_payments) as type_total_payments,
         sum(s.total_endorsements) as type_total_endorsements,
         sum(s.total_pe) as type_payments_endorsements,
+        sum(s.closed_claims) as closed_claims,
+        sum(s.open_claims) as open_claims,
+        sum(s.pending_claims) as pending_claims,
         sum(s.total_claims) as type_claims,
         sum(s.net_income) as net_income
     from (
@@ -75,13 +91,16 @@ as
 
 alter task rli.present.generate_loss_ratio_by_policy_nightly resume;
 
-
+--drop table rli.present.prs_loss_ratio_by_policy_type_yearmonth;
 create table if not exists rli.present.prs_loss_ratio_by_policy_type_yearmonth(
     yearmonth number,
     policy_type varchar,
     type_total_payments number(12,2),
     type_total_endorsements number(12,2),
     type_payments_endorsements number(12,2),
+    closed_claims number(12,2),
+    open_claims number(12,2),
+    pending_claims number(12,2),
     type_claims number(12,2),
     net_income number(12,2),
     loss_ratio number(15,8)
@@ -118,15 +137,28 @@ while (current_date_iter <= current_date()) do
         type_total_payments,
         type_total_endorsements,
         type_payments_endorsements,
+        closed_claims,
+        open_claims,
+        pending_claims,
         type_claims,
         net_income,
-        case when type_payments_endorsements > 0 then type_claims / type_payments_endorsements else null end as loss_ratio
+        --case when type_payments_endorsements > 0 then type_claims / type_payments_endorsements else null end as loss_ratio
+        rli.present.loss_ratio(
+            type_total_payments,
+            type_total_endorsements,
+            closed_claims,
+            open_claims,
+            pending_claims
+        ) as loss_ratio
     from (
         select
             s.policy_type,
             sum(s.total_payments) as type_total_payments,
             sum(s.total_endorsements) as type_total_endorsements,
             sum(s.total_pe) as type_payments_endorsements,
+            sum(s.closed_claims) as closed_claims,
+            sum(s.open_claims) as open_claims,
+            sum(s.pending_claims) as pending_claims,
             sum(s.total_claims) as type_claims,
             sum(s.net_income) as net_income
         from (
