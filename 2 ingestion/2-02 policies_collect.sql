@@ -74,11 +74,11 @@ end;
 $$;
 
 
-create or replace task rli.collect.policies_nightly
+create or replace task rli.collect.collect_policies_nightly
   warehouse = compute_wh
   schedule = 'using cron 30 1 * * * America/Chicago'
 as
   call rli.collect.collect_policies();
 
 
-alter task rli.collect.policies_collect_nightly resume;
+alter task rli.collect.collect_policies_nightly resume;

@@ -77,24 +77,35 @@ where a.payment_amount <= 0
 -------------------------------------
 -- DOCUMENT ORPHANED DATA -----------
 -------------------------------------
-delete from rli.transform.orphaned_data
-where table_name = 'trn_payments';
+--delete from rli.transform.orphaned_data
+--where table_name = 'trn_payments';
 
-insert into rli.transform.orphaned_data (table_name, foreign_table, key_value)
+insert into rli.transform.cleaned_data (table_name, table_id, reason, action_taken)
 select distinct
     'trn_payments',
-    'trn_policies',
-    a.policy_id
+    a.payment_id,
+    'missing parent in rli.transform.trn_policies ' || a.policy_id,
+    'record not transformed'
+-- insert into rli.transform.orphaned_data (table_name, foreign_table, key_value)
+-- select distinct
+--     'trn_payments',
+--     'trn_policies',
+--     a.policy_id
 from rli.collect.col_payments a
 left join rli.transform.trn_policies p
     on p.policy_id = a.policy_id
 where p.policy_id is null
   and a.policy_id is not null
   and not exists (
-      select 1 from rli.transform.orphaned_data o
-      where o.table_name = 'trn_payments'
-        and o.foreign_table = 'trn_policies'
-        and o.key_value = a.policy_id
+      -- select 1 from rli.transform.orphaned_data o
+      -- where o.table_name = 'trn_payments'
+      --   and o.foreign_table = 'trn_policies'
+      --   and o.key_value = a.policy_id
+        select 1 from rli.transform.cleaned_data o
+        where o.table_name = 'trn_payments'
+            and o.table_id = a.payment_id
+            and o.reason = 'missing parent in rli.transform.trn_policies ' || a.policy_id
+            and o.action_taken = 'record not transformed'
   );
 
     return 'payments transformed successfully';

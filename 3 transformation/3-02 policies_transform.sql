@@ -97,24 +97,31 @@ where p.expiration_date < p.effective_date
 -------------------------------------
 -- DOCUMENT ORPHANED DATA -----------
 -------------------------------------
-delete from rli.transform.orphaned_data
-where table_name = 'trn_policies';
+--delete from rli.transform.orphaned_data
+-- where table_name = 'trn_policies';
 
-insert into rli.transform.orphaned_data (table_name, foreign_table, key_value)
+insert into rli.transform.cleaned_data (table_name, table_id, reason, action_taken)
 select distinct
     'trn_policies',
-    'trn_customers',
-    p.customer_id
+    --'trn_customers',
+    p.policy_id,
+    'missing parent in rli.transform.trn_customers ' || p.customer_id,
+    'record not transformed'
 from rli.collect.col_policies p
 left join rli.transform.trn_customers c
     on c.customer_id = p.customer_id
 where c.customer_id is null
   and p.customer_id is not null
   and not exists (
-      select 1 from rli.transform.orphaned_data o
-      where o.table_name = 'trn_policies'
-        and o.foreign_table = 'trn_customers'
-        and o.key_value = p.customer_id
+      -- select 1 from rli.transform.cleaned_data o
+      -- where o.table_name = 'trn_policies'
+      --   and o.key_value = p.policy_id
+      --   and o.key_value = p.customer_id
+        select 1 from rli.transform.cleaned_data o
+        where o.table_name = 'trn_policies'
+            and o.table_id = p.policy_id
+            and o.reason = 'missing parent in rli.transform.trn_customers ' || p.customer_id
+            and o.action_taken = 'record not transformed'
   );
 
     return 'policies transformed successfully';

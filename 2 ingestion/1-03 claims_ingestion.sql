@@ -9,6 +9,13 @@ create file format if not exists rli.ingest.claims_csv_format
 create stage if not exists rli.ingest.claims_file_stage
   file_format = rli.ingest.claims_csv_format;
 
+create table if not exists rli.ingest.raw_claims (
+    claim_id number,
+    policy_id number,
+    claim_date date,
+    claim_amount number(12,2),
+    claim_status varchar
+);
 
 create or replace procedure rli.ingest.load_raw_claims()
   returns string

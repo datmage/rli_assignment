@@ -60,24 +60,35 @@ when not matched then
 -------------------------------------
 -- DOCUMENT ORPHANED DATA -----------
 -------------------------------------
-delete from rli.transform.orphaned_data
+delete from rli.transform.cleaned_data
 where table_name = 'trn_claims';
 
-insert into rli.transform.orphaned_data (table_name, foreign_table, key_value)
+insert into rli.transform.cleaned_data (table_name, table_id, reason, action_taken)
 select distinct
     'trn_claims',
-    'trn_policies',
-    c.policy_id
+    c.claim_id,
+    'missing parent in rli.transform.trn_policies ' || c.policy_id,
+    'record not transformed'
+-- insert into rli.transform.orphaned_data (table_name, foreign_table, key_value)
+-- select distinct
+--     'trn_claims',
+--     'trn_policies',
+--     c.policy_id
 from rli.collect.col_claims c
 left join rli.transform.trn_policies p
     on p.policy_id = c.policy_id
 where p.policy_id is null
   and c.policy_id is not null
   and not exists (
-      select 1 from rli.transform.orphaned_data o
-      where o.table_name = 'trn_claims'
-        and o.foreign_table = 'trn_policies'
-        and o.key_value = c.claim_id
+      -- select 1 from rli.transform.orphaned_data o
+      -- where o.table_name = 'trn_claims'
+      --   and o.foreign_table = 'trn_policies'
+      --   and o.key_value = c.claim_id
+        select 1 from rli.transform.cleaned_data o
+        where o.table_name = 'trn_claims'
+            and o.table_id = c.claim_id
+            and o.reason = 'missing parent in rli.transform.trn_policies ' || c.policy_id
+            and o.action_taken = 'record not transformed'
   );
 
 return 'claims transformed successfully';
@@ -85,11 +96,11 @@ return 'claims transformed successfully';
 end;
 $$;
 
-create or replace task rli.transform.claims_nightly
+create or replace task rli.transform.transform_claims_nightly
   warehouse = compute_wh
   schedule = 'using cron 0 2 * * * America/Chicago'
 as
   call rli.transform.transform_claims();
 
 
-alter task rli.transform.claims_transform_nightly resume;
+alter task rli.transform.transform_claims_nightly resume;

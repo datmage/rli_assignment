@@ -1,3 +1,4 @@
+--drop database rli;
 create database if not exists rli;
 
 create schema if not exists rli.ingest;

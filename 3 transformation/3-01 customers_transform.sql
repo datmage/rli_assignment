@@ -13,11 +13,11 @@ create table if not exists rli.transform.cleaned_data (
     reason varchar,
     action_taken varchar
 );
-create table if not exists rli.transform.orphaned_data (
-    table_name varchar,
-    foreign_table varchar,
-    key_value number
-);
+-- create table if not exists rli.transform.orphaned_data (
+--     table_name varchar,
+--     foreign_table varchar,
+--     key_value number
+-- );
 
 create or replace procedure rli.transform.transform_customers()
   returns string
